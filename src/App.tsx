@@ -15,7 +15,6 @@ function App() {
   console.log(gameController);
 
   useEffect(setup, []);
-
   return (
     <div className="App">
       <canvas ref={canvas}/>

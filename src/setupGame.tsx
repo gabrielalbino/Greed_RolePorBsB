@@ -13,8 +13,6 @@ const setDimensions = (canvasObject: HTMLCanvasElement) => {
 const setupStyle = (canvasObject: HTMLCanvasElement) => {
     const ctx = canvasObject.getContext('2d');
     if(!ctx) return;
-    ctx.strokeStyle = 'red';
-    ctx.fillStyle = 'red';
     ctx.font = '1rem arial';
 }
 

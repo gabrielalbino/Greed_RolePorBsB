@@ -13,14 +13,25 @@ export class GameController {
         this.canvas = canvas;   
         this.ctx = canvas?.getContext('2d');
         this.cities = this._generateStops();
+        this.mouse = {x: 0, y: 0};
+        this._setupMouseTracking();
         requestAnimationFrame(this.animate.bind(this));
     }
 
     animate(){
         this.ctx?.clearRect(0,0, this.canvas?.width || 0,this.canvas?.height || 0);
+        var cursor = 'default';
         this.cities.forEach(city=>{
+            city.update(this.mouse);
             city.draw();
-        })
+            if(city.drawTravelLabel) {
+                cursor = 'pointer';
+            }
+        });
+        if(this.canvas) {
+            this.canvas.style.cursor= cursor;
+        }
+        requestAnimationFrame(this.animate.bind(this));
     }
 
     _generateStops() {
@@ -65,5 +76,12 @@ export class GameController {
         return angle;
     }
 
+    _setupMouseTracking(){
+        const callback = (event: MouseEvent) => {
+            this.mouse.x = event.clientX;
+            this.mouse.y = event.clientY;
+        }
+        window.addEventListener('mousemove', callback.bind(this));
+    }
     
 }
