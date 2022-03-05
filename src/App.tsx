@@ -1,24 +1,24 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useRef, useEffect, useState } from 'react';
 import './App.css';
+import { GameController } from './GameController';
+import setupGame from './setupGame';
 
 function App() {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const [gameController, setGameController] = useState<GameController | null>(null);
+  const setup = () => {
+    const { current: canvasObject } = canvas;
+    if (!canvasObject) return;
+    setupGame(canvasObject);
+    setGameController(new GameController(canvas.current))
+  }
+  console.log(gameController);
+
+  useEffect(setup, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <canvas ref={canvas}/>
     </div>
   );
 }
