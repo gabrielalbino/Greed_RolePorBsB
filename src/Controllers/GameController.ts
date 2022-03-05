@@ -1,8 +1,8 @@
-import { citiesList } from "./constants";
-import { getRandomArbitrary } from "./helpers";
-import { City } from "./Models/City";
-import { Point } from "./Models/types";
-import { User } from "./Models/User";
+import { citiesList } from "../constants";
+import { getRandomArbitrary } from "../helpers";
+import { City } from "../Models/City";
+import { Point } from "../Models/types";
+import { User } from "../Models/User";
 
 export class GameController {
     canvas: HTMLCanvasElement | null;
@@ -40,7 +40,8 @@ export class GameController {
                 cursor = 'pointer';
             }
         });
-        const moneyLabel = `Seu dinheiro: R$ ${this.user.money.toFixed(2).toString().replace(".",",")}`;
+        const decomposedMoneyString = this.user.decomposedMoney.map(moneyUnit => moneyUnit.toFixed(2));
+        const moneyLabel = `Seu dinheiro: R$ ${this.user.money.toFixed(2).replace(".",",")} [${decomposedMoneyString}]`;
         this.ctx.fillStyle = 'white';    
         this.ctx.font = '2rem arial';
         this.ctx.fillText(moneyLabel, 50, 50);        
@@ -67,7 +68,7 @@ export class GameController {
         document.addEventListener('click', () => {
             if(this.cityInHover !== -1 && this.user.money > this.cities[this.cityInHover].currentTicketPrice) {
                 this.user.location = this.cityInHover;
-                this.user.money -= this.cities[this.cityInHover].currentTicketPrice;
+                this.user.payTicket(this.cities[this.cityInHover].currentTicketPrice);
             }
         });
     }

@@ -1,6 +1,6 @@
 import React, {useRef, useEffect, useState } from 'react';
 import './App.css';
-import { GameController } from './GameController';
+import { GameController } from './Controllers/GameController';
 import setupGame from './setupGame';
 
 function App() {
