@@ -1,5 +1,5 @@
 import { citiesList } from "../constants";
-import { getRandomArbitrary } from "../helpers";
+import { createGradient, getRandomArbitrary } from "../helpers";
 import { City } from "../Models/City";
 import { MoneyImages, Point } from "../Models/types";
 import { User } from "../Models/User";
@@ -14,6 +14,9 @@ export class GameController {
     numberOfCities = 10;
     cityInHover = -1;
     images;
+    backgroundGradient;
+    pathGradient: CanvasGradient | undefined;
+    pathDefaultGradient: CanvasGradient | undefined;
     constructor(canvas:HTMLCanvasElement | null, images: MoneyImages) {
         this.canvas = canvas;   
         this.ctx = canvas?.getContext('2d');
@@ -23,13 +26,18 @@ export class GameController {
         this._setupPathCoords();
         this._setupUserCityChanger();
         this.images = images;
+        this.pathGradient = createGradient(this.ctx, '#2193b0', '#6dd5ed', 0, 0, this.canvas?.width, this.canvas?.height);
+        this.pathDefaultGradient = createGradient(this.ctx, '#ee9ca7', '#ffdde1', 0, 0, this.canvas?.width, this.canvas?.height);
+        this.backgroundGradient = createGradient(this.ctx, '#42275a', '#734b6d', 0, 0, this.canvas?.width, this.canvas?.height);
         requestAnimationFrame(this.animate.bind(this));
     }
 
     animate(){
-        if(!this.ctx) return;
+        if(!this.ctx || !this.backgroundGradient || !this.canvas) return;
         const direction = this._getDirection();
-        this.ctx.clearRect(0,0, this.canvas?.width || 0,this.canvas?.height || 0);
+        this.ctx.clearRect(0,0, this.canvas.width,this.canvas.height);
+        this.ctx.fillStyle = this.backgroundGradient;
+        this.ctx.fillRect(0,0, this.canvas.width,this.canvas.height);
         this._drawPaths(direction);
         this._drawImages();
         var cursor = 'default';
@@ -43,19 +51,14 @@ export class GameController {
                 cursor = 'pointer';
             }
         });
-        const decomposedMoneyString = this.user.decomposedMoney.map(moneyUnit => moneyUnit.toFixed(2));
-        const moneyLabel = `Seu dinheiro: R$ ${this.user.money.toFixed(2).replace(".",",")} [${decomposedMoneyString}]`;
-        this.ctx.fillStyle = 'white';    
+        const moneyLabel = `Seu dinheiro: R$ ${this.user.money.toFixed(2).replace(".",",")}`;
+        this.ctx.fillStyle = '#eee';    
         this.ctx.font = '2rem arial';
         this.ctx.fillText(moneyLabel, 50, 50);        
         if(this.cityInHover !== -1){
-            this.ctx.fillText(`Viajar para ${this.cities[this.cityInHover].name}`, 50, 150);             
+            this.ctx.fillText(`Viajar para ${this.cities[this.cityInHover].name}\nTroco: R$ ${(this.user.money - this.cities[this.cityInHover].currentTicketPrice).toFixed(2)}`, 50, 150);             
         }
             
-        if(direction !== 0){
-            this.ctx.fillText(`Direção: ${direction === -1 ? 'direita' : 'esquerda'}`, 50, 250);             
-        }
-        
         this.ctx.font = '1rem arial';
         if(this.canvas) {
             this.canvas.style.cursor= cursor;
@@ -69,12 +72,33 @@ export class GameController {
     }
 
     _drawUserMoney(){
+        var cumulativeOffset = 80;
+        var colPos = 200;
         this.user.decomposedMoney.forEach((value: number, index:number) => {
-            if(!this.ctx || !this.canvas) return;
-            console.log(this.images, value.toFixed(2))
             const imageToDraw = this.images[value.toFixed(2)];
-            if(imageToDraw.image && value >= 2){
-                this.ctx.drawImage(imageToDraw.image, 50*index, 400, imageToDraw.width, imageToDraw.height);
+            if(!imageToDraw.image) return;
+            const imagesSize = {'Cell': 150,'Coin': 75},
+            offset = {
+                'Cell': {width: 30, heigth: 0},
+                'Coin': {width: 100, heigth: 75}
+            },
+            type =  value < 2 ? 'Coin' : 'Cell',
+            imageSize = imagesSize[type],
+            imageOffset = offset[type];
+            if(!this.ctx || !this.canvas) return;
+            if(type === 'Cell'){
+                const x = cumulativeOffset + index * imageOffset.width,
+                y = colPos;
+                this.ctx.save();
+                this.ctx.translate(x, y);
+                this.ctx.rotate((0 + 15*index*Math.PI)/180);
+                this.ctx.drawImage(imageToDraw.image, x, y, imageSize, imageSize * imageToDraw.height / imageToDraw.width);
+                this.ctx.restore();
+            }
+            else {
+                const x = 20,
+                y = colPos + index * imageOffset.heigth;
+                this.ctx.drawImage(imageToDraw.image, x, y, imageSize, imageSize * imageToDraw.height / imageToDraw.width);
             }
         })
     }
@@ -121,13 +145,13 @@ export class GameController {
         if(!this.ctx) return;
         this.ctx.lineWidth = 5;
         this.pathCoords.forEach((pathCoord, idx) => {
-            if(!this.ctx) return;
+            if(!this.ctx || !this.pathGradient || !this.pathDefaultGradient) return;
             const isPathTravelPath = isTravelPath(idx, direction),
             startingPoint = pathCoord[0],
             endingPoint = pathCoord[1],
             controlPoint = pathCoord[2];
             this.ctx.beginPath();
-            this.ctx.strokeStyle = isPathTravelPath ? 'yellow' : 'white';
+            this.ctx.strokeStyle = isPathTravelPath ? this.pathGradient : this.pathDefaultGradient;
             this.ctx.moveTo(startingPoint.x, startingPoint.y);
             this.ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, endingPoint.x, endingPoint.y);
             this.ctx.stroke();
@@ -170,7 +194,7 @@ export class GameController {
     }
 
     _generateUser(){
-        const initialMoney = Math.round(getRandomArbitrary(400,600)) * 0.05;
+        const initialMoney = Math.round(getRandomArbitrary(800,1000)) * 0.05;
         const initialLocation = Math.round(getRandomArbitrary(0,this.numberOfCities - 1));
         return new User(initialMoney, initialLocation);
     }

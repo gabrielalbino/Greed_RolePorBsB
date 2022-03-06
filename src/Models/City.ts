@@ -1,4 +1,4 @@
-import { getRandomArbitrary } from "../helpers";
+import { createGradient, getRandomArbitrary } from "../helpers";
 import { Point } from "./types"
 
 export class City {
@@ -7,7 +7,7 @@ export class City {
     name;
     radius = 20;
     dynamicRadius = 20;
-    color = 'white';
+    color: string | CanvasGradient | undefined = 'white';
     isInHover = false;
     drawUserIsHereLabel = false;
     currentTicketPrice = 0.0;
@@ -15,6 +15,9 @@ export class City {
     ctx;
     idx;
     setHovered;
+    hoverGradient;
+    userGradient;
+    defaultGradient;
     constructor(
         position:Point, 
         name:string, 
@@ -29,6 +32,9 @@ export class City {
         this.ctx = ctx;
         this.idx = idx;
         this.setHovered = setHovered;
+        this.hoverGradient = createGradient(ctx, '#2193b0', '#6dd5ed', this.position.x, this.position.y, this.dynamicRadius * 2, this.dynamicRadius * 2);
+        this.userGradient = createGradient(ctx, '#bdc3c7', '#2c3e50', this.position.x, this.position.y, this.dynamicRadius * 2, this.dynamicRadius * 2);
+        this.defaultGradient = createGradient(this.ctx, '#ee9ca7', '#ffdde1', this.position.x, this.position.y, this.dynamicRadius * 2, this.dynamicRadius * 2);
         //ticket base price for nice random prices
         this.ticketBasePrice = Math.round(getRandomArbitrary(30,50)) * 0.05;
     }
@@ -40,9 +46,9 @@ export class City {
         const deltaY =  Math.abs(mousePosition.y - this.position.y);
         const isHovering = (deltaX < limit && deltaY < limit);
         this._handleHover(isHovering);
-        let color = 'white' 
-        if (isHovering) color = 'yellow';
-        if (userIsHere) color = '#ff6666';
+        let color: CanvasGradient | undefined | string = this.defaultGradient;
+        if (isHovering) color = this.hoverGradient;
+        if (userIsHere) color = this.userGradient;
         this.color = color;
         this.drawUserIsHereLabel = userIsHere;
         this.currentTicketPrice = currentDistanceFromUser * this.ticketBasePrice;
@@ -60,8 +66,8 @@ export class City {
     }
 
     draw() {
-        if(!this.ctx) return;
-        this.ctx.font = '1rem arial';
+        if(!this.ctx || !this.color) return;
+        this.ctx.font = '1.25rem arial bold';
         const text = `${this.name}`;
         const textMeasurements = this.ctx?.measureText(text) || {width: 0};
         this.ctx.strokeStyle = this.color;
@@ -70,6 +76,7 @@ export class City {
         this.ctx.arc(this.position.x, this.position.y, this.dynamicRadius, 0, 2 * Math.PI);
         this.ctx.stroke();
         this.ctx.fill();
+        this.ctx.fillStyle = 'white';    
         this.ctx.fillText(text, this.position.x - textMeasurements.width/2, this.position.y + this.dynamicRadius * 2) 
         if (this.isInHover || this.drawUserIsHereLabel) {
             const text = this.drawUserIsHereLabel ? "Você" : `Tarifa: R$ ${this.currentTicketPrice.toFixed(2).toString().replace(".",",")}`;
