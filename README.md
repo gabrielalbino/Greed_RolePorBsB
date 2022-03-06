@@ -10,22 +10,21 @@
 | 16/0028361  | Gabriel Batista Albino Silva |
 
 ## Sobre 
-Descreva os objetivos do seu projeto e como ele funciona. 
+O meu aplicativo é um protótipo de game onde o algoritmo do trocador é utilizado para decompor o dinheiro do usuário em cedulas/moedas de real.
 
 ## Screenshots
-Adicione 3 ou mais screenshots do projeto em funcionamento.
+
+![](1.png)
+![](2.png)
+![](3.png)
 
 ## Instalação 
-**Linguagem**: xxxxxx<br>
-**Framework**: (caso exista)<br>
-Descreva os pré-requisitos para rodar o seu projeto e os comandos necessários.
+**Linguagem**: Javascript<br>
+**Framework**: React/Canvas<br>
 
-## Uso 
-Explique como usar seu projeto caso haja algum passo a passo após o comando de execução.
+Pré-requisitos: Node v17.4.0
 
-## Outros 
-Quaisquer outras informações sobre seu projeto podem ser descritas abaixo.
-
-
-
-
+### Instalação:
+* Execute o comando `npm install -g yarn`
+* Vá até o diretorio do projeto e digite `yarn install`
+* Após a conclusão da instalação, execute o comando `npm start`
