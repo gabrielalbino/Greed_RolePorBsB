@@ -1,7 +1,7 @@
 import { citiesList } from "../constants";
 import { getRandomArbitrary } from "../helpers";
 import { City } from "../Models/City";
-import { Point } from "../Models/types";
+import { MoneyImages, Point } from "../Models/types";
 import { User } from "../Models/User";
 
 export class GameController {
@@ -13,7 +13,8 @@ export class GameController {
     pathCoords:Array<Array<Point>> = [];
     numberOfCities = 10;
     cityInHover = -1;
-    constructor(canvas:HTMLCanvasElement | null) {
+    images;
+    constructor(canvas:HTMLCanvasElement | null, images: MoneyImages) {
         this.canvas = canvas;   
         this.ctx = canvas?.getContext('2d');
         this.cities = this._generateStops();
@@ -21,6 +22,7 @@ export class GameController {
         this._setupMouseTracking();
         this._setupPathCoords();
         this._setupUserCityChanger();
+        this.images = images;
         requestAnimationFrame(this.animate.bind(this));
     }
 
@@ -29,6 +31,7 @@ export class GameController {
         const direction = this._getDirection();
         this.ctx.clearRect(0,0, this.canvas?.width || 0,this.canvas?.height || 0);
         this._drawPaths(direction);
+        this._drawImages();
         var cursor = 'default';
         this.cities.forEach((city, cityIndex)=>{
             const { location } = this.user;
@@ -58,6 +61,22 @@ export class GameController {
             this.canvas.style.cursor= cursor;
         }
         requestAnimationFrame(this.animate.bind(this));
+    }
+
+    _drawImages(){
+        if(!this.ctx) return;
+        this._drawUserMoney();
+    }
+
+    _drawUserMoney(){
+        this.user.decomposedMoney.forEach((value: number, index:number) => {
+            if(!this.ctx || !this.canvas) return;
+            console.log(this.images, value.toFixed(2))
+            const imageToDraw = this.images[value.toFixed(2)];
+            if(imageToDraw.image && value >= 2){
+                this.ctx.drawImage(imageToDraw.image, 50*index, 400, imageToDraw.width, imageToDraw.height);
+            }
+        })
     }
 
     _setCityHovered(cityIndex: number){
