@@ -1,16 +1,8 @@
 
 # Rolê por BSB
 
-**Número da Lista**: 3<br>
-**Conteúdo da Disciplina**: Greed<br>
-
-## Alunos
-|Matrícula | Aluno |
-| -- | -- |
-| 16/0028361  | Gabriel Batista Albino Silva |
-
 ## Sobre 
-O meu aplicativo é um protótipo de game onde o algoritmo do trocador é utilizado para decompor o dinheiro do usuário em cedulas/moedas de real.
+O  aplicativo é um protótipo de game onde o algoritmo ambicioso do trocador é utilizado para decompor o dinheiro do usuário em cedulas/moedas de real.
 
 ## Screenshots
 
